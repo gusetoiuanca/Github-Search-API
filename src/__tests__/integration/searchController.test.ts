@@ -34,14 +34,14 @@ const mockRepos = {
 describe("GET / - Search Controller Integration Test", () => {
   it("should return a 200 status and correctly sorted repositories", async () => {
     const scope = nock("https://api.github.com")
-      .get("/search/repositories?q=q%3D&per_page=100&sort=stars&order=desc")
+      .get("/search/repositories?q=&per_page=100&sort=stars&order=desc")
       .reply(200, JSON.stringify(mockRepos), {
         "content-type": "application/json; charset=utf-8",
       });
 
     // Make the request using supertest
     const response = await request(app).get("/searchRepositories/");
-    //console.log(response.body);
+    console.log(response.body);
     // Assertions
     expect(response.status).toBe(200);
     expect(response.body.data.length).toBe(3);

@@ -1,5 +1,6 @@
 import {
   validateCreatedFormat,
+  sanitizeLanguage,
   validatePageNumberFormat,
 } from "../../utils/validateSearchParameters";
 import { BadRequestError } from "../../utils/errors/ApiError";
@@ -62,8 +63,32 @@ describe("validatePageNumberFormat", () => {
   it("should throw BadRequestError for a non-numeric string", () => {
     expect(() => validatePageNumberFormat("abc")).toThrow(BadRequestError);
   });
-
   it("should throw BadRequestError for a decimal number string", () => {
     expect(validatePageNumberFormat("1")).toBe(1);
+  });
+});
+
+describe("sanitizeLanguage", () => {
+  it("should return undefined for undefined input", () => {
+    expect(sanitizeLanguage(undefined)).toBeUndefined();
+  });
+
+  it("should remove special characters not in the whitelist", () => {
+    expect(sanitizeLanguage("javascript' OR 1=1--")).toBe("javascript OR 11--");
+    expect(sanitizeLanguage("java<script>alert(1)</script>")).toBe("javascriptalert1script");
+    expect(sanitizeLanguage("python; DROP TABLE users;")).toBe("python DROP TABLE users");
+  });
+
+  it("should preserve allowed special characters and spaces", () => {
+    expect(sanitizeLanguage("C++")).toBe("C++");
+    expect(sanitizeLanguage("C#")).toBe("C#");
+    expect(sanitizeLanguage("Objective-C")).toBe("Objective-C");
+    expect(sanitizeLanguage("F#")).toBe("F#");
+    expect(sanitizeLanguage("Type Script")).toBe("Type Script");
+  });
+
+  it("should return the original string if no sanitization is needed", () => {
+    expect(sanitizeLanguage("typescript")).toBe("typescript");
+    expect(sanitizeLanguage("java")).toBe("java");
   });
 });

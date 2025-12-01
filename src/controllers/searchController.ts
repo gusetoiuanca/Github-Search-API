@@ -8,7 +8,11 @@ import { generateUniqueId } from "../utils/generateRequestId.js";
 import logger from "../utils/logger.js";
 import { calculateScore } from "../utils/scoring.js";
 import { GithubRepository } from "../models/githubRepository.js";
-import { validateCreatedFormat, validatePageNumberFormat } from "../utils/validateSearchParameters.js";
+import {
+  validateCreatedFormat,
+  sanitizeLanguage,
+  validatePageNumberFormat,
+} from "../utils/validateSearchParameters.js";
 import {
   BadRequestError,
   InternalServerError,
@@ -24,7 +28,7 @@ export async function searchController(
   try {
     const { language, created, page } = req.query;
     const searchParams: SearchParams = {
-      language: language as string | undefined,
+      language: sanitizeLanguage(language as string | undefined),
       sort: "stars",
       order: "desc",
     };

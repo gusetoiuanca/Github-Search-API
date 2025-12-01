@@ -25,3 +25,13 @@ export function validatePageNumberFormat( page: string | undefined):number | und
   }
   return pageNum;
 }
+
+export function sanitizeLanguage(
+  language: string | undefined,
+): string | undefined {
+  if (language === undefined) {
+    return undefined;
+  }
+  // Allow alphanumeric, spaces, +, #, -
+  return language.replace(/[^a-zA-Z0-9\s+#-]/g, "");
+}

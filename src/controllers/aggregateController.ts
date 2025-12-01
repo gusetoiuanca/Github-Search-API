@@ -13,7 +13,10 @@ import {
   BadRequestError,
   InternalServerError,
 } from "../utils/errors/ApiError.js";
-import { validateCreatedFormat } from "../utils/validateSearchParameters.js";
+import {
+  validateCreatedFormat,
+  sanitizeLanguage,
+} from "../utils/validateSearchParameters.js";
 
 export async function aggregateController(
   req: Request,
@@ -27,7 +30,7 @@ export async function aggregateController(
     validateCreatedFormat(created as string | undefined);
 
     const searchParams: SearchParams = {
-      language: language as string | undefined,
+      language: sanitizeLanguage(language as string | undefined),
       created: created as string | undefined,
     };
     logger.debug(
