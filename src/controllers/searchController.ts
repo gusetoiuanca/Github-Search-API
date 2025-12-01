@@ -8,6 +8,7 @@ import { generateUniqueId } from "../utils/generateRequestId.js";
 import logger from "../utils/logger.js";
 import { calculateScore } from "../utils/scoring.js";
 import { GithubRepository } from "../models/githubRepository.js";
+import { validateCreatedFormat, validatePageNumberFormat } from "../utils/validateSearchParameters.js";
 import {
   BadRequestError,
   InternalServerError,
@@ -22,24 +23,18 @@ export async function searchController(
   logger.info({ query: req.query }, "Incoming search request", requestId);
   try {
     const { language, created, page } = req.query;
-
-    let pageNum: number | undefined;
-    if (page !== undefined) {
-      pageNum = parseInt(page as string, 10);
-      if (isNaN(pageNum) || pageNum <= 0) {
-        throw new BadRequestError(
-          "Invalid 'page' parameter. Must be a positive number.",
-        );
-      }
-    }
-
     const searchParams: SearchParams = {
       language: language as string | undefined,
-      created: created as string | undefined,
-      page: pageNum,
       sort: "stars",
       order: "desc",
     };
+    if(created) {
+      validateCreatedFormat(created as string | undefined);
+      searchParams.created = created as string;
+    }
+    if(page){
+      searchParams.page = validatePageNumberFormat(page as string);
+    }
     logger.debug(
       { searchParams },
       "Calling GitHub service with parameters",

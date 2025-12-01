@@ -2,10 +2,9 @@ import { Octokit } from "octokit";
 
 import { GithubRequest } from "../models/githubRequest.js";
 import { SearchParams } from "../models/searchParams.js";
-import { GithubRepository } from "src/models/githubRepository.js";
 import { GithubResponse } from "src/models/githubResponse.js";
 const octokit = new Octokit();
-const NO_OF_REPOSITORIES = 1;
+const NO_OF_REPOSITORIES = 100;
 
 export async function searchRepositories(params: SearchParams) {
   const response = await octokit.request(
@@ -35,15 +34,18 @@ export async function aggregateRepositories(params: SearchParams) {
 function computeRequestParams(params: SearchParams): GithubRequest {
   const { language, created, page, sort, order } = params;
 
-  let q = "q=";
+  let q = "";
   if (language) {
-    q += ` language:${language} `;
+    q += `language:${language}`;
   }
   if (created) {
-    q += ` created:>=${created} `;
+    if (q.length > 0) {
+      q += " ";
+    }
+    q += `created:${created}`;
   }
   const requestParams: GithubRequest = {
-    q: q,
+    q: q.trim(),
     page: page,
     per_page: NO_OF_REPOSITORIES,
     headers: {

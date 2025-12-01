@@ -9,7 +9,11 @@ import { generateUniqueId } from "../utils/generateRequestId.js";
 import logger from "../utils/logger.js";
 import { calculateScore, scaleToInterval } from "../utils/scoring.js";
 import { GithubRepository } from "../models/githubRepository.js";
-import { InternalServerError } from "../utils/errors/ApiError.js";
+import {
+  BadRequestError,
+  InternalServerError,
+} from "../utils/errors/ApiError.js";
+import { validateCreatedFormat } from "../utils/validateSearchParameters.js";
 
 export async function aggregateController(
   req: Request,
@@ -20,6 +24,7 @@ export async function aggregateController(
   logger.info({ query: req.query }, "Incoming aggregate request", requestId);
   try {
     const { language, created } = req.query;
+    validateCreatedFormat(created as string | undefined);
 
     const searchParams: SearchParams = {
       language: language as string | undefined,
@@ -61,10 +66,14 @@ export async function aggregateController(
       "An error occurred in aggregateController",
     );
     // Pass the error to the next middleware (errorHandler)
-    next(
-      new InternalServerError("An internal server error occurred.", {
-        originalError: error.message,
-      }),
-    );
+    if (error instanceof BadRequestError) {
+      next(error);
+    } else {
+      next(
+        new InternalServerError("An internal server error occurred.", {
+          originalError: error.message,
+        }),
+      );
+    }
   }
 }
