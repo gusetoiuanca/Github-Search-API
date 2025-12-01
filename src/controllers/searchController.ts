@@ -28,10 +28,12 @@ export async function searchController(
   try {
     const { language, created, page } = req.query;
     const searchParams: SearchParams = {
-      language: sanitizeLanguage(language as string | undefined),
       sort: "stars",
       order: "desc",
     };
+    if(language) {
+      searchParams.language = sanitizeLanguage(language as string | undefined);
+    }
     if(created) {
       validateCreatedFormat(created as string | undefined);
       searchParams.created = created as string;

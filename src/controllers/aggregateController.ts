@@ -29,10 +29,14 @@ export async function aggregateController(
     const { language, created } = req.query;
     validateCreatedFormat(created as string | undefined);
 
-    const searchParams: SearchParams = {
-      language: sanitizeLanguage(language as string | undefined),
-      created: created as string | undefined,
-    };
+    const searchParams: SearchParams = {};
+    if(language) {
+      searchParams.language = sanitizeLanguage(language as string | undefined);
+    }
+    if(created) {
+      validateCreatedFormat(created as string | undefined);
+      searchParams.created = created as string;
+    }
     logger.debug(
       { searchParams },
       "Calling GitHub service with parameters",
